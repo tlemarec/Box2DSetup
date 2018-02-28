@@ -1,8 +1,13 @@
+#include <windows.h>
 #include <Box2D\Box2D.h>
 #include <SFML\Graphics.hpp>
 
 #include <stdio.h>
 #include <iostream>
+
+#include "worldBody.h"
+
+#define SCALE 30.0
 
 
 int main(int argc, char** argv)
@@ -10,28 +15,25 @@ int main(int argc, char** argv)
 	B2_NOT_USED(argc);
 	B2_NOT_USED(argv);
 
-	const double SCALE = 30.0;
-	//window
-	sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
+	//System info
+	::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+	int width = GetSystemMetrics(SM_CXSCREEN);
+	int height = GetSystemMetrics(SM_CYSCREEN);
+	std::cout << "width : " << width << ", height : " << height;
+	
+	//SFML Window
+	sf::RenderWindow window(sf::VideoMode(width, height), "SFML works!");
 	window.setFramerateLimit(60);
 	
-	// SFML Shapes
-	//falling object
-	sf::RectangleShape dynamicShape;
-	dynamicShape.setSize(sf::Vector2f(100, 100));
-	dynamicShape.setFillColor(sf::Color::Blue);
-
-	//ground
-	sf::RectangleShape groundShape;
-	groundShape.setSize(sf::Vector2f(1920, 100));
-	groundShape.setFillColor(sf::Color::Green);
-
-
-	//World
+	//Box2d World
 	b2Vec2 gravity(0.0f, 10.0f);
 	b2World world(gravity);
 
-	// Dynamic Body
+	//SCube
+	sf::RectangleShape dynamicShape;
+	dynamicShape.setSize(sf::Vector2f(100, 100));
+	dynamicShape.setFillColor(sf::Color::Blue);
+	//BCube
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_dynamicBody;
 	bodyDef.position = b2Vec2(100 / SCALE, 100 / SCALE);
@@ -46,16 +48,24 @@ int main(int argc, char** argv)
 	body->CreateFixture(&fixtureDef);
 
 
-	// Define the ground body.
-	b2BodyDef groundBodyDef;
-	groundBodyDef.position = b2Vec2(0 / SCALE, 900 / SCALE);
-	groundBodyDef.type = b2_staticBody;
-	b2Body* groundBody = world.CreateBody(&groundBodyDef);
-	
-	b2PolygonShape groundBox;
-	groundBox.SetAsBox((800.f / 2) / SCALE, (100.f / 2) / SCALE);
-	groundBody->CreateFixture(&groundBox, 0.0f);
+	////BGround
+	//b2BodyDef groundBodyDef;
+	//groundBodyDef.position = b2Vec2(0 / SCALE, 900 / SCALE);
+	//groundBodyDef.type = b2_staticBody;
+	//b2Body* groundBody = world.CreateBody(&groundBodyDef);
 
+	//b2PolygonShape groundBox;
+	//groundBox.SetAsBox((800.f / 2) / SCALE, (100.f / 2) / SCALE);
+	//groundBody->CreateFixture(&groundBox, 0.0f);
+
+	////SGround
+	//sf::RectangleShape groundShape;
+	//groundShape.setSize(sf::Vector2f(1920, 100));
+	//groundShape.setFillColor(sf::Color::Green);
+
+	WorldBody ground;
+	ground.generateWorldBody(world, b2Vec2(0 / SCALE, 900 / SCALE), b2_staticBody, 800.f, 100.f, sf::Color::Green);
+	
 
 	// Prepare for simulation. Typically we use a time step of 1/60 of a
 	// second (60Hz) and 10 iterations. This provides a high quality simulation
@@ -97,11 +107,11 @@ int main(int argc, char** argv)
 
 				else if (BodyIterator->GetType() == b2_staticBody)
 				{
-					groundShape.setOrigin(800, 0);
-					groundShape.setPosition(BodyIterator->GetPosition().x * 30, BodyIterator->GetPosition().y * 30);
-					groundShape.setRotation(BodyIterator->GetAngle() * 180 / b2_pi);
+					ground.sfmlShape.setOrigin(800, 0);
+					ground.sfmlShape.setPosition(ground.boxBody->GetPosition().x * 30, ground.boxBody->GetPosition().y * 30);
+					ground.sfmlShape.setRotation(ground.boxBody->GetAngle() * 180 / b2_pi);
 
-					window.draw(groundShape);
+					window.draw(ground.sfmlShape);
 
 				}
 			}
