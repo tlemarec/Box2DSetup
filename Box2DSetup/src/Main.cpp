@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "worldBody.h"
+#include "WorldObject.h"
 
-#define SCALE 30.0
+#define SCALE 30.f
 
 
 int main(int argc, char** argv)
@@ -17,73 +17,33 @@ int main(int argc, char** argv)
 
 	//System info
 	::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
-	int width = GetSystemMetrics(SM_CXSCREEN);
-	int height = GetSystemMetrics(SM_CYSCREEN);
-	std::cout << "width : " << width << ", height : " << height;
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	std::cout << "width : " << screenWidth << ", height : " << screenHeight << std::endl;
 	
 	//SFML Window
-	sf::RenderWindow window(sf::VideoMode(width, height), "SFML works!");
+	sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "SFML works!");
 	window.setFramerateLimit(60);
 	
-	//Box2d World
-	b2Vec2 gravity(0.0f, 10.0f);
+	//Box2d World generation
+	b2Vec2 gravity(0.f, 10.f);
 	b2World world(gravity);
+	WorldObject ground(world, WorldObject::Rectangle, b2_staticBody, sf::Color::White, screenWidth/2.f, screenHeight, screenWidth, 300.f);
 
-	//SCube
-	sf::RectangleShape dynamicShape;
-	dynamicShape.setSize(sf::Vector2f(100, 100));
-	dynamicShape.setFillColor(sf::Color::Blue);
-	//BCube
-	b2BodyDef bodyDef;
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.position = b2Vec2(100 / SCALE, 100 / SCALE);
-	b2Body* body = world.CreateBody(&bodyDef);
+	//Robot generation
 
-	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox((100.f / 2) / SCALE, (100.f / 2) / SCALE);
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;
-	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 0.3f;
-	body->CreateFixture(&fixtureDef);
-
-
-	////BGround
-	//b2BodyDef groundBodyDef;
-	//groundBodyDef.position = b2Vec2(0 / SCALE, 900 / SCALE);
-	//groundBodyDef.type = b2_staticBody;
-	//b2Body* groundBody = world.CreateBody(&groundBodyDef);
-
-	//b2PolygonShape groundBox;
-	//groundBox.SetAsBox((800.f / 2) / SCALE, (100.f / 2) / SCALE);
-	//groundBody->CreateFixture(&groundBox, 0.0f);
-
-	////SGround
-	//sf::RectangleShape groundShape;
-	//groundShape.setSize(sf::Vector2f(1920, 100));
-	//groundShape.setFillColor(sf::Color::Green);
-
-	WorldBody ground;
-	ground.generateWorldBody(world, b2Vec2(0 / SCALE, 900 / SCALE), b2_staticBody, 800.f, 100.f, sf::Color::Green);
 	
-
-	// Prepare for simulation. Typically we use a time step of 1/60 of a
-	// second (60Hz) and 10 iterations. This provides a high quality simulation
-	// in most game scenarios.
-	float32 timeStep = 1.0f / 60.0f;
-	int32 velocityIterations = 6;
-	int32 positionIterations = 2;
-
-	// This is our little game loop.
-	
+	//Simulation
+	float timeStep = 1.f / 60.f;
+	int velocityIterations = 6;
+	int positionIterations = 2;
 	while (window.isOpen())
 	{
 		
-		for (int32 i = 0; i < 60; ++i)
+		for (int i = 0; i < 60; ++i)
 		{
 			// Step Simulation
 			world.Step(timeStep, velocityIterations, positionIterations);
-
 			window.clear();
 
 			sf::Event event;
@@ -92,44 +52,20 @@ int main(int argc, char** argv)
 				if (event.type == sf::Event::Closed)
 					window.close();
 			}
-			
-			for (b2Body* BodyIterator = world.GetBodyList(); BodyIterator != 0; BodyIterator = BodyIterator->GetNext())
-			{
-				if (BodyIterator->GetType() == b2_dynamicBody)
-				{
 
-					dynamicShape.setOrigin(50, 50);
-					dynamicShape.setPosition(BodyIterator->GetPosition().x * 30, BodyIterator->GetPosition().y * 30);
-					dynamicShape.setRotation(BodyIterator->GetAngle() * 180 / b2_pi);
-					window.draw(dynamicShape);
-
-				}
-
-				else if (BodyIterator->GetType() == b2_staticBody)
-				{
-					ground.sfmlShape.setOrigin(800, 0);
-					ground.sfmlShape.setPosition(ground.boxBody->GetPosition().x * 30, ground.boxBody->GetPosition().y * 30);
-					ground.sfmlShape.setRotation(ground.boxBody->GetAngle() * 180 / b2_pi);
-
-					window.draw(ground.sfmlShape);
-
-				}
-			}
+			ground.update();
+			ground.render(window);
 
 			window.display();
 
-
 			// Console output
-			b2Vec2 position = body->GetPosition();
-			float32 angle = body->GetAngle();
-			printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
-
+			ground.GetPosition();
+			
 		}
 
 
 	}
 
 	std::cin.get();
-	
 	return 0;
 }
