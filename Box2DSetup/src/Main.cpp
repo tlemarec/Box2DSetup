@@ -20,19 +20,20 @@ int main(int argc, char** argv)
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 	std::cout << "width : " << screenWidth << ", height : " << screenHeight << std::endl;
-	
+		
 	//SFML Window
-	sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "SFML works!");
+	sf::RenderWindow window(sf::VideoMode(screenWidth / 2.f, screenHeight / 2.f), "SFML works!");
 	window.setFramerateLimit(60);
 	
 	//Box2d World generation
 	b2Vec2 gravity(0.f, 10.f);
 	b2World world(gravity);
-	WorldObject ground(world, WorldObject::Rectangle, b2_staticBody, sf::Color::White, screenWidth/2.f, screenHeight, screenWidth, 300.f);
+	WorldObject ground(world, WorldObject::Rectangle, WorldObject::ObjectType::Static, sf::Color::White, screenWidth / 4.f, screenHeight / 2.f, screenWidth / 2.f, 50.f);
 
 	//Robot generation
+	CircleWorldObject wheelLeft(world, CircleWorldObject::ObjectType::Static, sf::Color::White, 200.f, 400.f, 300.f, 30.f);
+	CircleWorldObject wheelRight(world, CircleWorldObject::ObjectType::Dynamic , sf::Color::Red, 200.f , -100.f, 30.f, 30.f);
 
-	
 	//Simulation
 	float timeStep = 1.f / 60.f;
 	int velocityIterations = 6;
@@ -53,13 +54,21 @@ int main(int argc, char** argv)
 					window.close();
 			}
 
-			ground.update();
-			ground.render(window);
+			ground.positionUpdate();
+			ground.imageRender(window);
+
+			wheelLeft.positionUpdate();
+			wheelLeft.imageRender(window);
+
+			wheelRight.positionUpdate();
+			wheelRight.imageRender(window);
 
 			window.display();
 
 			// Console output
-			ground.GetPosition();
+			wheelLeft.GetPosition("wheelLeft");
+			wheelRight.GetPosition("wheelRight");
+			ground.GetPosition("ground");
 			
 		}
 
@@ -67,5 +76,5 @@ int main(int argc, char** argv)
 	}
 
 	std::cin.get();
-	return 0;
+	return EXIT_SUCCESS;
 }

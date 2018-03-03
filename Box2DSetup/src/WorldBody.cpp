@@ -1,20 +1,39 @@
+#include <stdio.h>
+#include <iostream>
 #include <Box2D\Box2D.h>
 #include <SFML\Graphics.hpp>
 #include "WorldObject.h"
 
 #define SCALE 30.f
 
-void WorldObject::update()
+//WorldObject
+void WorldObject::positionUpdate()
 {
 	renderShape.setPosition(physicalBody->GetPosition().x * SCALE, physicalBody->GetPosition().y * SCALE);
 	renderShape.setRotation((physicalBody->GetAngle() * (180.0f / b2_pi)));
 }
 
-void WorldObject::render(sf::RenderWindow& renderWindow)
+void WorldObject::imageRender(sf::RenderWindow& renderWindow)
 {
 	renderWindow.draw(renderShape);
 }
-void WorldObject::GetPosition() {
+void WorldObject::GetPosition(std::string name) {
+	b2Vec2 position = physicalBody->GetPosition();	
+	std::cout << name << ", xPos : " << position.x << ", yPos : " << position.y << std::endl;
+}
+
+//CircleWorldObject
+void CircleWorldObject::positionUpdate()
+{
+	renderShape.setPosition(physicalBody->GetPosition().x * SCALE, physicalBody->GetPosition().y * SCALE);
+	renderShape.setRotation((physicalBody->GetAngle() * (180.0f / b2_pi)));
+}
+
+void CircleWorldObject::imageRender(sf::RenderWindow& renderWindow)
+{
+	renderWindow.draw(renderShape);
+}
+void CircleWorldObject::GetPosition(std::string name) {
 	b2Vec2 position = physicalBody->GetPosition();
-	printf("xPos : %4.2f meters, yPos : %4.2f meters\n", position.x, position.y);
+	std::cout << name << ", xPos : "  << position.x << ", yPos : " << position.y << std::endl;
 }
