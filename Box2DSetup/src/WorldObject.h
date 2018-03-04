@@ -6,6 +6,25 @@
 
 #define SCALE 30.f
 
+class WorldObject 
+{
+private:
+	b2Body * physicalBody;
+
+public:
+	static enum ObjectShape { EquilateralTriangle };
+	static enum ObjectType { Dynamic, Static };
+
+	//void positionUpdate();
+
+	//void imageRender(sf::RenderWindow& renderWindow);
+
+	void getPosition(std::string name);
+
+	b2Body* getPhysicalBody();
+
+};
+
 class ConvexWorldObject
 {
 private:
@@ -198,6 +217,7 @@ public:
 		renderShape.setSize(sf::Vector2f(widthInPixels, heightInPixels));
 		renderShape.setOutlineColor(color);
 		renderShape.setOutlineThickness(-5);
+		renderShape.setFillColor(color);
 
 		renderShape.setPosition((physicalBody->GetPosition().x * SCALE), (physicalBody->GetPosition().y * SCALE));
 		renderShape.setRotation(physicalBody->GetAngle() * (180.0f / b2_pi));

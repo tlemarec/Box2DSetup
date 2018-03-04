@@ -33,21 +33,42 @@ int main(int argc, char** argv)
 
 	//Robot generation
 	CircleWorldObject wheelRight(world, CircleWorldObject::ObjectType::Dynamic, sf::Color::White, 1100.f, -500.f, 120.f, 120.f);
-	CircleWorldObject wheelLeft(world, CircleWorldObject::ObjectType::Static, sf::Color::White, 500.f, 500.f);
-	RectangleWorldObject armLeft(world, RectangleWorldObject::ObjectType::Dynamic, sf::Color::White, 600.f, -300.f, 30.f, 200.f);
-	RectangleWorldObject armRight(world, RectangleWorldObject::ObjectType::Dynamic, sf::Color::Red, 500.f, -100.f, 2000.f, 30.f);
-	ConvexWorldObject triangle(world, ConvexWorldObject::EquilateralTriangle, ConvexWorldObject::ObjectType::Dynamic, sf::Color::Blue, 500.f, 100.f, 200.f, 100.f);
+	CircleWorldObject wheelLeft(world, CircleWorldObject::ObjectType::Dynamic, sf::Color::White, 200.f, 200.f, 150.f, 150.f);
+	RectangleWorldObject armLeft(world, RectangleWorldObject::ObjectType::Dynamic, sf::Color::Blue, 400.f, 200.f, 500.f, 30.f);
+	RectangleWorldObject armRight(world, RectangleWorldObject::ObjectType::Dynamic, sf::Color::Red, 700.f, -100.f, 500.f, 30.f);
+	//ConvexWorldObject triangle(world, ConvexWorldObject::EquilateralTriangle, ConvexWorldObject::ObjectType::Dynamic, sf::Color::Blue, 500.f, 100.f, 200.f, 100.f);
+
+	//Joint Center
+	b2RevoluteJointDef jointCenterDef;
+	jointCenterDef.bodyA = armLeft.getPhysicalBody();
+	jointCenterDef.bodyB = armRight.getPhysicalBody();
+	jointCenterDef.collideConnected = false;
+	jointCenterDef.localAnchorA.Set(-250.f / SCALE, 0.f / SCALE);
+	jointCenterDef.localAnchorB.Set(-250.f / SCALE, 0.f / SCALE);
+	jointCenterDef.referenceAngle = -b2_pi / 2.f;
+	b2RevoluteJoint* jointCenter = (b2RevoluteJoint*)world.CreateJoint(&jointCenterDef);
 
 
-	////Joint Left
-	//b2RevoluteJointDef jointLeftDef;
-	//jointLeftDef.bodyA = wheelLeft.getPhysicalBody();
-	//jointLeftDef.bodyB = armLeft.getPhysicalBody();
-	//jointLeftDef.collideConnected = false;
-	//jointLeftDef.localAnchorA.Set(0.f, 0.f);
-	//jointLeftDef.localAnchorB.Set(70.f, 0);
-	//jointLeftDef.referenceAngle = 0.f;
-	//b2RevoluteJoint* jointLeft = (b2RevoluteJoint*)world.CreateJoint(&jointLeftDef);
+	//Joint Left
+	b2RevoluteJointDef jointLeftDef;
+	jointLeftDef.bodyA = wheelLeft.getPhysicalBody();
+	jointLeftDef.bodyB = armLeft.getPhysicalBody();
+	jointLeftDef.collideConnected = false;
+	jointLeftDef.localAnchorA.Set(0.f / SCALE, 0.f / SCALE);
+	jointLeftDef.localAnchorB.Set(250.f / SCALE, 0.f / SCALE);
+	jointLeftDef.referenceAngle = 0.f;
+	b2RevoluteJoint* jointLeft = (b2RevoluteJoint*)world.CreateJoint(&jointLeftDef);
+
+	//Joint Right
+	b2RevoluteJointDef jointRightDef;
+	jointRightDef.bodyA = wheelRight.getPhysicalBody();
+	jointRightDef.bodyB = armRight.getPhysicalBody();
+	jointRightDef.collideConnected = false;
+	jointRightDef.localAnchorA.Set(0.f / SCALE, 0.f / SCALE);
+	jointRightDef.localAnchorB.Set(250.f / SCALE, 0.f / SCALE);
+	jointRightDef.referenceAngle = 0.f;
+	b2RevoluteJoint* jointRight = (b2RevoluteJoint*)world.CreateJoint(&jointRightDef);
+
 
 	//Simulation
 	float timeStep = 1.f / 90.f;
@@ -72,8 +93,8 @@ int main(int argc, char** argv)
 			ground.positionUpdate();
 			ground.imageRender(window);
 
-			triangle.positionUpdate();
-			triangle.imageRender(window);
+			//triangle.positionUpdate();
+			//triangle.imageRender(window);
 
 			wheelLeft.positionUpdate();
 			wheelLeft.imageRender(window);
@@ -89,6 +110,7 @@ int main(int argc, char** argv)
 
 			window.display();
 
+		
 			//Console output
 			//wheelLeft.getPosition("wheelLeft");
 			//armLeft.getPosition("armLeft");
