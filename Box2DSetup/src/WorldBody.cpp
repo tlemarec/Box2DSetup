@@ -6,20 +6,25 @@
 
 #define SCALE 30.f
 
-//WorldObject
-void WorldObject::positionUpdate()
+//ConvexWorldObject
+void ConvexWorldObject::positionUpdate()
 {
 	renderShape.setPosition(physicalBody->GetPosition().x * SCALE, physicalBody->GetPosition().y * SCALE);
 	renderShape.setRotation((physicalBody->GetAngle() * (180.0f / b2_pi)));
 }
 
-void WorldObject::imageRender(sf::RenderWindow& renderWindow)
+void ConvexWorldObject::imageRender(sf::RenderWindow& renderWindow)
 {
 	renderWindow.draw(renderShape);
 }
-void WorldObject::GetPosition(std::string name) {
+void ConvexWorldObject::getPosition(std::string name) {
 	b2Vec2 position = physicalBody->GetPosition();	
 	std::cout << name << ", xPos : " << position.x << ", yPos : " << position.y << std::endl;
+}
+
+b2Body* ConvexWorldObject::getPhysicalBody()
+{
+	return physicalBody;
 }
 
 //CircleWorldObject
@@ -33,7 +38,33 @@ void CircleWorldObject::imageRender(sf::RenderWindow& renderWindow)
 {
 	renderWindow.draw(renderShape);
 }
-void CircleWorldObject::GetPosition(std::string name) {
+void CircleWorldObject::getPosition(std::string name) {
 	b2Vec2 position = physicalBody->GetPosition();
 	std::cout << name << ", xPos : "  << position.x << ", yPos : " << position.y << std::endl;
+}
+
+b2Body* CircleWorldObject::getPhysicalBody()
+{
+	return physicalBody;
+}
+
+//RectangleWorldObject
+void RectangleWorldObject::positionUpdate()
+{
+	renderShape.setPosition(physicalBody->GetPosition().x * SCALE, physicalBody->GetPosition().y * SCALE);
+	renderShape.setRotation((physicalBody->GetAngle() * (180.0f / b2_pi)));
+}
+
+void RectangleWorldObject::imageRender(sf::RenderWindow& renderWindow)
+{
+	renderWindow.draw(renderShape);
+}
+void RectangleWorldObject::getPosition(std::string name) {
+	b2Vec2 position = physicalBody->GetPosition();
+	std::cout << name << ", xPos : " << position.x << ", yPos : " << position.y << std::endl;
+}
+
+b2Body* RectangleWorldObject::getPhysicalBody()
+{
+	return physicalBody;
 }
