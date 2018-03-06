@@ -29,15 +29,16 @@ int main(int argc, char** argv)
 	b2Vec2 gravity(0.f, 10.f);
 	b2World world(gravity);
 	
-	RectangleWorldObject ground(world, RectangleWorldObject::ObjectType::Static, sf::Color::White, screenWidth / 4.f, screenHeight / 2.f, screenWidth / 2.f, 50.f);
+	RectangleWorldObject ground(world, b2_staticBody, sf::Color::White, screenWidth / 4.f, screenHeight / 2.f, screenWidth / 2.f, 50.f);
 
 	//Robot generation
-	CircleWorldObject wheelRight(world, CircleWorldObject::ObjectType::Dynamic, sf::Color::White, 1100.f, -500.f, 120.f, 120.f);
-	CircleWorldObject wheelLeft(world, CircleWorldObject::ObjectType::Dynamic, sf::Color::White, 200.f, 200.f, 150.f, 150.f);
-	RectangleWorldObject armLeft(world, RectangleWorldObject::ObjectType::Dynamic, sf::Color::Blue, 400.f, 200.f, 500.f, 30.f);
-	RectangleWorldObject armRight(world, RectangleWorldObject::ObjectType::Dynamic, sf::Color::Red, 700.f, -100.f, 500.f, 30.f);
-	//ConvexWorldObject triangle(world, ConvexWorldObject::EquilateralTriangle, ConvexWorldObject::ObjectType::Dynamic, sf::Color::Blue, 500.f, 100.f, 200.f, 100.f);
+	CircleWorldObject wheelRight(world, b2_dynamicBody, sf::Color::White, 1100.f, -500.f, 120.f);
+	CircleWorldObject wheelLeft(world, b2_dynamicBody, sf::Color::White, 200.f, 200.f, 150.f);
+	RectangleWorldObject armLeft(world, b2_dynamicBody, sf::Color::Blue, 400.f, -200.f, 500.f, 30.f);
+	RectangleWorldObject armRight(world, b2_dynamicBody, sf::Color::Red, 700.f, -100.f, 500.f, 30.f);
+	ConvexWorldObject triangle(world, b2_dynamicBody, ConvexWorldObject::ConvexShape::EquilateralTriangle, sf::Color::Blue, 500.f, 100.f, 200.f, 100.f);
 
+	/*
 	//Joint Center
 	b2RevoluteJointDef jointCenterDef;
 	jointCenterDef.bodyA = armLeft.getPhysicalBody();
@@ -68,10 +69,11 @@ int main(int argc, char** argv)
 	jointRightDef.localAnchorB.Set(250.f / SCALE, 0.f / SCALE);
 	jointRightDef.referenceAngle = 0.f;
 	b2RevoluteJoint* jointRight = (b2RevoluteJoint*)world.CreateJoint(&jointRightDef);
+	*/
 
 
 	//Simulation
-	float timeStep = 1.f / 90.f;
+	float timeStep = 1.f / 30.f;
 	int velocityIterations = 6;
 	int positionIterations = 2;
 	while (window.isOpen())
@@ -79,7 +81,7 @@ int main(int argc, char** argv)
 		
 		for (int i = 0; i < 60; ++i)
 		{
-			// Step Simulation
+		// Step Simulation
 			world.Step(timeStep, velocityIterations, positionIterations);
 			window.clear();
 
@@ -93,8 +95,8 @@ int main(int argc, char** argv)
 			ground.positionUpdate();
 			ground.imageRender(window);
 
-			//triangle.positionUpdate();
-			//triangle.imageRender(window);
+			triangle.positionUpdate();
+			triangle.imageRender(window);
 
 			wheelLeft.positionUpdate();
 			wheelLeft.imageRender(window);
@@ -110,8 +112,7 @@ int main(int argc, char** argv)
 
 			window.display();
 
-		
-			//Console output
+		//Console output
 			//wheelLeft.getPosition("wheelLeft");
 			//armLeft.getPosition("armLeft");
 			//wheelRight.getPosition("wheelRight");

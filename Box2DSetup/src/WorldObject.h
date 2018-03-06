@@ -1,5 +1,5 @@
-#ifndef pgcdHPP
-#define pgcdHPP
+#ifndef WorldObjectHPP
+#define WorldObjectHPP
 
 #include <Box2D\Box2D.h>
 #include <SFML\Graphics.hpp>
@@ -8,57 +8,43 @@
 
 class WorldObject 
 {
-private:
+protected:
 	b2Body * physicalBody;
 
 public:
-	static enum ObjectShape { EquilateralTriangle };
 	static enum ObjectType { Dynamic, Static };
-
-	//void positionUpdate();
-
-	//void imageRender(sf::RenderWindow& renderWindow);
-
-	void getPosition(std::string name);
-
-	b2Body* getPhysicalBody();
-
-};
-
-class ConvexWorldObject
-{
-private:
-	b2Body* physicalBody;
-	sf::ConvexShape renderShape;
-
-public:
-	static enum ObjectShape { EquilateralTriangle};
-	static enum ObjectType { Dynamic, Static};
-	ConvexWorldObject(b2World& world, const ConvexWorldObject::ObjectShape shape = ConvexWorldObject::ObjectShape::EquilateralTriangle, ConvexWorldObject::ObjectType type = ConvexWorldObject::ObjectType::Dynamic, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float widthInPixels = 30.f, float heightInPixels = 30.f)
+	
+	WorldObject(b2World& world, b2BodyType bodyType, float xPos = 0.f, float yPos = 0.f)
 	{
 		b2BodyDef bodyDef;
-		b2FixtureDef fixture;
-
-		switch (type)
-		{
-		case Dynamic:
-		{
-			bodyDef.type = b2_dynamicBody;
-			fixture.density = 1.0f;
-			break;
-		}
-		case Static:
-		{
-			bodyDef.type = b2_staticBody;
-			fixture.density = 0.0f;
-			break;
-		}
-		}
-
+		bodyDef.type = bodyType;
 		bodyDef.position.Set(xPos / SCALE, yPos / SCALE);
 		bodyDef.angle = -(b2_pi);
 		physicalBody = world.CreateBody(&bodyDef);
+	}
 
+	virtual void positionUpdate() = 0;
+
+	virtual void imageRender(sf::RenderWindow& renderWindow) = 0;
+
+	void getPosition(std::string name) const;
+
+	b2Body* getPhysicalBody();
+};
+
+class ConvexWorldObject : public WorldObject
+{
+private:
+	sf::ConvexShape renderShape;
+
+public:
+	static enum ConvexShape { EquilateralTriangle };
+
+	ConvexWorldObject(b2World& world, b2BodyType bodyType, const ConvexWorldObject::ConvexShape shape = ConvexWorldObject::ConvexShape::EquilateralTriangle, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float widthInPixels = 30.f, float heightInPixels = 30.f) : WorldObject(world, bodyType, xPos, yPos)
+	{
+		b2BodyDef bodyDef;
+		b2FixtureDef fixture;
+		fixture.density = 1.f;
 		fixture.friction = 0.7f;
 		fixture.restitution = 0.1f;
 
@@ -67,13 +53,9 @@ public:
 		case EquilateralTriangle:
 		default:
 		{
-			float sizeInPixels = widthInPixels;
-			float sizeInMKS = sizeInPixels / SCALE;
-			const int pointCount = 3;
-			b2Vec2 points[pointCount] = { b2Vec2(sizeInMKS,0), b2Vec2(-sizeInMKS,sizeInMKS), b2Vec2(-sizeInMKS,-sizeInMKS) };
-			
 			b2PolygonShape bodyShape;
-			bodyShape.Set(points, pointCount);
+			b2Vec2 points[3] = { b2Vec2(widthInPixels / SCALE,0), b2Vec2(-widthInPixels / SCALE, widthInPixels / SCALE), b2Vec2(-widthInPixels / SCALE, -widthInPixels / SCALE) };
+			bodyShape.Set(points, 3);
 			fixture.shape = &bodyShape;
 			physicalBody->CreateFixture(&fixture);
 
@@ -82,133 +64,63 @@ public:
 			renderShape.setPoint(1, sf::Vector2f((points[1].x * SCALE), (points[1].y * SCALE)));
 			renderShape.setPoint(2, sf::Vector2f((points[2].x * SCALE), (points[2].y * SCALE)));
 			renderShape.setFillColor(color);
-			renderShape.setPosition((physicalBody->GetPosition().x * SCALE), (physicalBody->GetPosition().y * SCALE));
-			renderShape.setRotation(physicalBody->GetAngle() * (180.0f / b2_pi));
+			positionUpdate();
 			break;
 		}
 		}
 	}
 	
 	void positionUpdate();
-
-	void imageRender(sf::RenderWindow& renderWindow);
 	
-	void getPosition(std::string name);
-
-	b2Body* getPhysicalBody();
-
+	void imageRender(sf::RenderWindow& renderWindow);	
 };
 
-class CircleWorldObject
+class CircleWorldObject : public WorldObject
 {
 private:
-	b2Body * physicalBody;
 	sf::CircleShape renderShape;
-
 public:
-	static enum ObjectType { Dynamic, Static };
-	CircleWorldObject(b2World& world, CircleWorldObject::ObjectType type = CircleWorldObject::ObjectType::Dynamic, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float widthInPixels = 30.f, float heightInPixels = 30.f)
+	CircleWorldObject(b2World& world, b2BodyType bodyType, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float radiusInPixels = 30.f) : WorldObject(world, bodyType, xPos, yPos)
 	{
-		b2BodyDef bodyDef;
 		b2FixtureDef fixture;
-
-		switch (type)
-		{
-		case Dynamic:
-		default:
-		{
-			bodyDef.type = b2_dynamicBody;
-			fixture.density = 1.0f;
-			break;
-		}
-		case Static:
-		{
-			bodyDef.type = b2_staticBody;
-			fixture.density = 0.0f;
-			break;
-		}
-		}
-
-		bodyDef.position.Set(xPos / SCALE, yPos / SCALE);
-		bodyDef.angle = -(b2_pi);
-		physicalBody = world.CreateBody(&bodyDef);
-
 		fixture.friction = 0.7f;
 		fixture.restitution = 0.1f;
+		fixture.density = 1.0f;
 
-		float widthInMKS = widthInPixels / SCALE;
-		float heightInMKS = heightInPixels / SCALE;
 
 		b2CircleShape bodyShape;
-		bodyShape.m_radius = widthInMKS / 2.f;
+		bodyShape.m_radius = radiusInPixels / SCALE / 2.f;
 		fixture.shape = &bodyShape;
 		physicalBody->CreateFixture(&fixture);
 
-		renderShape.setOrigin(widthInPixels / 2.f, heightInPixels / 2.f);
-		renderShape.setRadius(widthInPixels / 2.f);
+		renderShape.setOrigin(radiusInPixels / 2.f, radiusInPixels / 2.f);
+		renderShape.setRadius(radiusInPixels / 2.f);
 		renderShape.setPointCount(50);
 		renderShape.setOutlineColor(color);
 		renderShape.setOutlineThickness(-5.f);
 		renderShape.setFillColor(color);
-
-		renderShape.setPosition((physicalBody->GetPosition().x * SCALE), (physicalBody->GetPosition().y * SCALE));
-		renderShape.setRotation(physicalBody->GetAngle() * (180.0f / b2_pi));
-
-		
+		positionUpdate();
 	}
 
 	void positionUpdate();
-
+	
 	void imageRender(sf::RenderWindow& renderWindow);
-
-	void getPosition(std::string name);
-
-	b2Body* getPhysicalBody();
-
 };
 
-class RectangleWorldObject
+class RectangleWorldObject : public WorldObject
 {
 private:
-	b2Body* physicalBody;
 	sf::RectangleShape renderShape;
-
 public:
-	static enum ObjectType { Dynamic, Static };
-	RectangleWorldObject(b2World& world, RectangleWorldObject::ObjectType type = RectangleWorldObject::ObjectType::Dynamic, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float widthInPixels = 30.f, float heightInPixels = 30.f)
+	RectangleWorldObject(b2World& world, b2BodyType bodyType, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float widthInPixels = 30.f, float heightInPixels = 30.f) : WorldObject(world, bodyType, xPos, yPos)
 	{
-		b2BodyDef bodyDef;
 		b2FixtureDef fixture;
-
-		switch (type)
-		{
-		case Dynamic:
-		default:
-		{
-			bodyDef.type = b2_dynamicBody;
-			fixture.density = 1.0f;
-			break;
-		}
-		case Static:
-		{
-			bodyDef.type = b2_staticBody;
-			fixture.density = 0.0f;
-			break;
-		}
-		}
-
-		bodyDef.position.Set(xPos / SCALE, yPos / SCALE);
-		bodyDef.angle = -(b2_pi);
-		physicalBody = world.CreateBody(&bodyDef);
-
 		fixture.friction = 0.7f;
 		fixture.restitution = 0.1f;
-
-		float widthInMKS = widthInPixels / SCALE;
-		float heightInMKS = heightInPixels / SCALE;
-
+		fixture.density = 1.0f;
+		
 		b2PolygonShape bodyShape;
-		bodyShape.SetAsBox(widthInMKS / 2.f, heightInMKS / 2.f);
+		bodyShape.SetAsBox(widthInPixels / 2.f / SCALE, heightInPixels / 2.f / SCALE);
 		fixture.shape = &bodyShape;
 		physicalBody->CreateFixture(&fixture);
 
@@ -218,20 +130,11 @@ public:
 		renderShape.setOutlineColor(color);
 		renderShape.setOutlineThickness(-5);
 		renderShape.setFillColor(color);
-
-		renderShape.setPosition((physicalBody->GetPosition().x * SCALE), (physicalBody->GetPosition().y * SCALE));
-		renderShape.setRotation(physicalBody->GetAngle() * (180.0f / b2_pi));
-
+		positionUpdate();
 	}
 	
 	void positionUpdate();
-
+	
 	void imageRender(sf::RenderWindow& renderWindow);
-
-	void getPosition(std::string name);
-
-	b2Body* getPhysicalBody();
 };
-
-
 #endif
