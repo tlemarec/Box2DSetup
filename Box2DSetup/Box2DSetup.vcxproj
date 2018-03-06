@@ -147,10 +147,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Robot.cpp" />
     <ClCompile Include="src\WorldBody.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\JointFactory.h" />
+    <ClInclude Include="src\Robot.h" />
     <ClInclude Include="src\WorldObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <iostream>
-#include <Box2D\Box2D.h>
-#include <SFML\Graphics.hpp>
 #include "WorldObject.h"
 
 #define SCALE 30.f
 
 //WorldObject
-void WorldObject::getPosition(std::string name) const 
+void WorldObject::getPosition(std::string name) 
 {
 	b2Vec2 position = physicalBody->GetPosition();
 	std::cout << name << ", xPos : " << position.x << ", yPos : " << position.y << std::endl;

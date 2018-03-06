@@ -9,7 +9,7 @@
 class WorldObject 
 {
 protected:
-	b2Body * physicalBody;
+	b2Body *physicalBody;
 
 public:
 	static enum ObjectType { Dynamic, Static };
@@ -27,7 +27,7 @@ public:
 
 	virtual void imageRender(sf::RenderWindow& renderWindow) = 0;
 
-	void getPosition(std::string name) const;
+	void getPosition(std::string name);
 
 	b2Body* getPhysicalBody();
 };
@@ -42,7 +42,6 @@ public:
 
 	ConvexWorldObject(b2World& world, b2BodyType bodyType, const ConvexWorldObject::ConvexShape shape = ConvexWorldObject::ConvexShape::EquilateralTriangle, const sf::Color &color = sf::Color::White, float xPos = 0.f, float yPos = 0.f, float widthInPixels = 30.f, float heightInPixels = 30.f) : WorldObject(world, bodyType, xPos, yPos)
 	{
-		b2BodyDef bodyDef;
 		b2FixtureDef fixture;
 		fixture.density = 1.f;
 		fixture.friction = 0.7f;
@@ -70,9 +69,9 @@ public:
 		}
 	}
 	
-	void positionUpdate();
+	virtual void positionUpdate();
 	
-	void imageRender(sf::RenderWindow& renderWindow);	
+	virtual void imageRender(sf::RenderWindow& renderWindow);	
 };
 
 class CircleWorldObject : public WorldObject
@@ -102,9 +101,9 @@ public:
 		positionUpdate();
 	}
 
-	void positionUpdate();
+	virtual void positionUpdate();
 	
-	void imageRender(sf::RenderWindow& renderWindow);
+	virtual void imageRender(sf::RenderWindow& renderWindow);
 };
 
 class RectangleWorldObject : public WorldObject
@@ -133,8 +132,8 @@ public:
 		positionUpdate();
 	}
 	
-	void positionUpdate();
+	virtual void positionUpdate();
 	
-	void imageRender(sf::RenderWindow& renderWindow);
+	virtual void imageRender(sf::RenderWindow& renderWindow);
 };
 #endif
